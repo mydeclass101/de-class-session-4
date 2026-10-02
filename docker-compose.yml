@@ -1,0 +1,40 @@
+name: de-session4
+
+# Docker รันแค่ "ระบบที่ Python ของเราไปคุยด้วย" ส่วนโค้ดเราเขียนและรันใน VS Code บนเครื่องตัวเอง
+#   rustfs  : object storage (เหมือน session 2) + Iceberg REST catalog ในตัว
+#   shop-api: API จำลองของร้านค้า (ค่าโฆษณารายวัน)
+
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.0
+    container_name: de4-rustfs
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: student
+      RUSTFS_SECRET_KEY: classroom
+      RUSTFS_ADDRESS: ":9000"               # S3 API + Iceberg REST catalog (/iceberg)
+      RUSTFS_CONSOLE_ADDRESS: ":9001"       # หน้าเว็บ
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "127.0.0.1:${RUSTFS_PORT:-9000}:9000"
+      - "127.0.0.1:${RUSTFS_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - rustfs_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:9000/health/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  shop-api:
+    build: ./docker/shop-api
+    container_name: de4-shop-api
+    restart: unless-stopped
+    environment:
+      API_KEY: class-demo-key
+      FLAKY_RATE: ${FLAKY_RATE:-0.25}       # 25% ของ request จะ error โดยตั้งใจ (429 / 503)
+    ports:
+      - "127.0.0.1:${SHOP_API_PORT:-8000}:8000"   # เอกสาร API: http://localhost:8000/docs
+
+volumes:
+  rustfs_data:

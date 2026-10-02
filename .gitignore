@@ -1,0 +1,14 @@
+# Python environment และรหัสผ่าน
+.venv/
+.env
+
+# งานของเราเอง (git ไม่สนใจ จะได้ git pull ได้โดยไม่ชน)
+work/*
+!work/README.md
+lessons/my_*
+# DuckDB สร้างโฟลเดอร์ว่างนี้เองตอน CREATE TABLE ... AS SELECT
+lessons/data/
+
+__pycache__/
+.ipynb_checkpoints/
+*.pyc

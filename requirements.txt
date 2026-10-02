@@ -1,0 +1,9 @@
+# pip install -r requirements.txt
+# (keep this file ASCII only: pip on Thai Windows cannot read Thai characters here)
+ipykernel          # lets VS Code run notebooks with the Python in .venv
+python-dotenv      # read settings from the .env file
+requests==2.34.2   # call APIs
+pandas==3.0.6      # tables in Python
+pyarrow==25.0.1    # parquet support for pandas
+boto3==1.43.103    # talk to RustFS (S3 API)
+duckdb==1.5.5      # SQL engine: read/write Iceberg tables through RustFS
