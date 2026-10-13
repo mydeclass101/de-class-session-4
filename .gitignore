@@ -8,6 +8,9 @@ work/*
 lessons/my_*
 # DuckDB สร้างโฟลเดอร์ว่างนี้เองตอน CREATE TABLE ... AS SELECT
 lessons/data/
+# ไฟล์ข้อมูลร้านค้า ดาวน์โหลดตอน docker compose up (ใหญ่เกินไปสำหรับ git)
+data/*.dump
+data/*.part
 
 __pycache__/
 .ipynb_checkpoints/

@@ -44,7 +44,25 @@ cook_for_family(boil_egg, 3)                       # ส่ง function (ไม�
 def make_coffee(): ...
 ```
 
-## import / object / ไฟล์ (บทที่ 3)
+## pandas + PostgreSQL (บทที่ 3)
+
+```python
+df = pd.DataFrame(list_of_dicts)          pd.read_csv(path)          pd.concat([a, b])
+df[["a", "b"]]      df[df["qty"] > 0]      df["total"] = df["qty"] * df["price"]
+df.groupby("day", as_index=False).agg(total=("amount", "sum"))
+a.merge(b, on="day", how="left")          df.to_csv(path, index=False)     df.to_parquet(path)
+
+with psycopg.connect(host=..., port=..., dbname=..., user=..., password=...) as conn:
+    conn.execute("SELECT ... WHERE ordered_at >= %(day)s::date", {"day": "2026-09-20"}).fetchall()   # .fetchone()
+
+engine = create_engine("postgresql+psycopg://student:student123@127.0.0.1:5432/ecommerce")
+pd.read_sql(sql, engine, params={"day": "2026-09-20"})                   # SQL -> DataFrame
+df.to_sql("t", engine, schema="lab", if_exists="replace", index=False)   # DataFrame -> ตาราง
+```
+
+⚠️ ส่งค่าเข้า SQL ด้วย `%(ชื่อ)s` + params เสมอ ห้ามต่อข้อความ (f-string) เอง
+
+## import / object / ไฟล์ (บทที่ 4)
 
 ```python
 import math; from datetime import date; import pandas as pd
@@ -55,7 +73,7 @@ Path("../data").glob("*.csv"), Path(p).read_text(encoding="utf-8")
 json.dumps(d, ensure_ascii=False), json.loads(text)
 ```
 
-## วันที่ (บทที่ 4)
+## วันที่ (บทที่ 5)
 
 ```python
 date(2026, 9, 25) + timedelta(days=1)
@@ -64,7 +82,7 @@ start = datetime.fromisoformat(day); end = start + timedelta(days=1)    # 1 ว�
 t.astimezone(ZoneInfo("Asia/Bangkok")).date()                           # UTC -> วันที่ไทย
 ```
 
-## Error / ค่าตั้งค่า (บทที่ 5)
+## Error / ค่าตั้งค่า (บทที่ 6)
 
 ```python
 try: ...
@@ -75,19 +93,14 @@ log = logging.getLogger("ชื่อ"); log.info(...); log.warning(...)
 load_dotenv(); os.getenv("SHOP_API_KEY")
 ```
 
-## API / pandas (บทที่ 6)
+## API (บทที่ 7)
 
 ```python
 resp = requests.get(url, params={"date": d}, headers={"X-API-Key": key}, timeout=10)
 resp.status_code, resp.json(), resp.raise_for_status()
-
-df = pd.DataFrame(list_of_dicts)          pd.read_csv(path)          pd.concat([a, b])
-df[["a", "b"]]      df[df["qty"] > 0]      df["total"] = df["qty"] * df["price"]
-df.groupby("day", as_index=False).agg(total=("amount", "sum"))
-a.merge(b, on="day", how="left")          df.to_parquet(path)
 ```
 
-## RustFS + Iceberg (บทที่ 7–8)
+## RustFS + Iceberg (บทที่ 8–9)
 
 ```python
 from lakehouse import storage, make_bucket, make_table_bucket, connect_lakehouse, show_tables

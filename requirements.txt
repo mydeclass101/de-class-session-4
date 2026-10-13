@@ -7,3 +7,5 @@ pandas==3.0.6      # tables in Python
 pyarrow==25.0.1    # parquet support for pandas
 boto3==1.43.103    # talk to RustFS (S3 API)
 duckdb==1.5.5      # SQL engine: read/write Iceberg tables through RustFS
+psycopg[binary]==3.3.6  # talk to PostgreSQL
+sqlalchemy==2.1.4  # lets pandas read/write PostgreSQL tables

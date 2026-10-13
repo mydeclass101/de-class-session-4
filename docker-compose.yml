@@ -3,6 +3,7 @@ name: de-session4
 # Docker รันแค่ "ระบบที่ Python ของเราไปคุยด้วย" ส่วนโค้ดเราเขียนและรันใน VS Code บนเครื่องตัวเอง
 #   rustfs  : object storage (เหมือน session 2) + Iceberg REST catalog ในตัว
 #   shop-api: API จำลองของร้านค้า (ค่าโฆษณารายวัน)
+#   ecommerce-db: PostgreSQL ข้อมูลร้านค้า (ข้อมูลชุดเดียวกับ MySQL ใน session 3) ผู้ใช้ student อ่านได้อย่างเดียว เขียนได้ใน schema lab
 
 services:
   rustfs:
@@ -36,5 +37,44 @@ services:
     ports:
       - "127.0.0.1:${SHOP_API_PORT:-8000}:8000"   # เอกสาร API: http://localhost:8000/docs
 
+  ecommerce-data:
+    # ดาวน์โหลดไฟล์ข้อมูลร้านค้าครั้งแรก (~100 MB) ถ้ามีไฟล์ใน data/ แล้วจะข้าม
+    image: curlimages/curl:8.17.0
+    user: "0:0"
+    environment:
+      DATA_URL: ${DATA_URL:-https://github.com/mydeclass101/de-class-session-5/releases/download/data-v1/ecommerce_pg.dump}
+    volumes:
+      - ./data:/data
+      - ./docker/ecommerce-db/download.sh:/download.sh:ro
+    entrypoint: ["sh", "/download.sh"]
+
+  ecommerce-db:
+    image: postgres:17.6
+    container_name: de4-ecommerce-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Bangkok
+      PGTZ: Asia/Bangkok
+    command: ["postgres", "-c", "timezone=Asia/Bangkok", "-c", "shared_buffers=256MB"]
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"          # DBeaver: localhost:5432 user student / student123
+    volumes:
+      - ecommerce_data:/var/lib/postgresql/data
+      - ./docker/ecommerce-db/init:/docker-entrypoint-initdb.d:ro
+      - ./data:/data:ro
+    healthcheck:
+      test: ["CMD-SHELL", "test ! -f /var/lib/postgresql/data/COURSE_DATA_MISSING && pg_isready -U postgres -d ecommerce && psql -U student -d ecommerce -tAc 'SELECT 1 FROM orders LIMIT 1' | grep -q 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10m                                  # ครั้งแรกต้อง restore ข้อมูล (ไม่กี่นาที)
+    depends_on:
+      ecommerce-data:
+        condition: service_completed_successfully
+
 volumes:
   rustfs_data:
+  ecommerce_data:
